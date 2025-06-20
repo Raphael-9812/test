@@ -1,0 +1,309 @@
+from abc import ABC,abstractmethod
+import random
+
+class Soldato(ABC):
+    def __init__(self, nome, costo, attacco, difesa, salute):
+        self.__nome=nome
+        self.__costo=costo
+        self.__attacco=attacco
+        self.__difesa=difesa
+        self.__salute=salute
+    def get_nome(self):
+        return self.__nome
+    def get_costo(self):
+        return self.__costo
+    def get_attacco(self):
+        return self.__attacco
+    def get_difesa(self):
+        return self.__difesa
+    def get_salute(self):
+        return self.__salute
+    def set_nome(self,nome):
+        self.__nome=nome
+    def set_costo(self,costo):
+        self.__costo=costo
+    def set_attacco(self,attacco):
+        self.__attacco=attacco
+    def set_difesa(self,difesa):
+        self.__difesa=difesa
+    def set_salute(self,salute):
+        self.__salute=salute
+    
+    
+    @abstractmethod
+    def attacca(self, avversario):
+        print(f"{self.get_nome()} attacca {avversario}")
+
+    def difenditi(self, danno):
+        danno_subito=danno-self.get_difesa()
+        if danno_subito>=0:
+            danno_subito=danno_subito
+        else:
+            danno_subito=0
+        salute_rimasta=self.__salute-danno_subito
+        
+        if salute_rimasta>=0:
+            salute_rimasta=salute_rimasta
+        else:
+            salute_rimasta=0
+        
+        self.set_salute(salute_rimasta)
+        print(f"{self.__nome} ha subito {danno_subito} danni")
+
+    def e_vivo(self):
+        return self.get_salute() > 0
+
+    def stato(self):
+        print(f"Nome: {self.get_nome()}, Salute: {self.get_salute()}, Tipo: {self.tipo()}")
+
+class Cavaliere(Soldato):
+    def __init__(self, nome,costo, attacco, difesa, salute):
+        super().__init__(nome,costo, attacco, difesa, salute)
+        self.costo=500
+        self.tipo="Cavaliere"
+    
+    def attacca(self, avversario):
+        super().attacca(avversario.get_nome())
+        crit=random.randint(1,10)
+        if crit>=1 and crit<=2:
+            doppio=self.get_attacco()
+            self.set_attacco(doppio*2)
+            print(f"{self.get_nome()}: CRITTATO")
+            self.set_attacco(doppio)
+
+class Arciere(Soldato):
+    def __init__(self, nome,costo, attacco, difesa, salute):
+        super().__init__(nome,costo, attacco, difesa, salute)
+        self.costo=250
+        self.tipo="Arciere"
+    
+    def attacca(self, avversario):
+        super().attacca(avversario.get_nome())
+
+class Mago(Soldato):
+    def __init__(self, nome,costo, attacco, difesa, salute):
+        super().__init__(nome,costo, attacco, difesa, salute)
+        self.costo=500
+        self.tipo="Mago"
+    
+    def attacca(self, avversario):
+        if random.random() <=0.25:
+            print("Stanchezza")
+            pass
+        else:
+            danno=random.randint(10,40)
+            super().set_attacco(danno)
+            print(f"{self.get_nome()} attacca {avversario.get_nome()} con {self.get_attacco()}")
+
+class Guaritore(Soldato):
+    def __init__(self, nome,costo, attacco, difesa, salute):
+        super().__init__(nome,costo, attacco, difesa, salute)
+        self.costo=250
+        self.tipo="Guaritore"
+    
+    def attacca(self, avversario):
+        pass
+    
+    def heal(self, alleati):
+        r=random.randrange(0,len(alleati))
+        if self.alleati[r].e_vivo:
+            cura=alleati[r].get_salute() +50
+            self.alleati[r].set_salute(cura)
+       
+class Esercito:
+    def __init__(self):
+        self.esercito_giocatore1=[]
+        self.esercito_giocatore2=[]
+        self.budget1=1000
+        self.budget2=1000
+
+    def aggiungi_soldato_giocatore1(self):
+        print(f"Giocatore hai un budget di {self.budget1} monete, i cavalieri e i maghi valgono 500 monete, gli arcieri e i guaritori valgono 250 monete.")
+        while True:
+            if self.budget1>0:
+                scelta=int(input("Chi vuoi aggiungere? 0 per Cavaliere, 1 per Arciere, 2 per Mago, 3 per Guaritore: "))
+                if scelta==0:
+                    if Cavaliere(0,500,20,20,50).get_costo()>self.budget1:
+                        print("Monete non disponibili")
+                        continue
+                    else:  
+                        nome=input("Nome cavaliere: ")
+                        cavaliere=Cavaliere(nome,500,20,20,50)
+                        self.esercito_giocatore1.append(cavaliere)
+                        self.budget1-=cavaliere.get_costo()
+                        print("Budget: ",self.budget1)
+                elif scelta==1:
+                    if Arciere(0,250,30,15,50).get_costo()>self.budget1:
+                        print("Monete insufficienti")
+                    else:
+                        nome=input("Nome arciere: ")
+                        arciere=Arciere(nome,250,30,15,50)
+                        self.esercito_giocatore1.append(arciere)
+                        self.budget1-=arciere.get_costo()
+                        print("Budget: ",self.budget1)
+                elif scelta==2:
+                    if Mago(0,500,0,15,50).get_costo()>self.budget1:
+                        print("Monete insufficienti")
+                    else:
+                        nome=input("Nome mago: ")
+                        mago=Mago(nome,500, 0, 15, 50)
+                        self.esercito_giocatore1.append(mago)
+                        self.budget1-=mago.get_costo()
+                        print("Budget: ",self.budget1)
+                elif scelta==3:
+                    if Guaritore(0,500,0,15,50).get_costo()>self.budget1:
+                        print("Non hai abbastanza monete")
+                    else:
+                        nome=input("Nome guaritore: ")
+                        guaritore=Guaritore(nome,250, 10, 15, 50)
+                        self.esercito_giocatore1.append(guaritore)
+                        self.budget1-=guaritore.get_costo()
+                        print("Budget: ",self.budget1)
+            else:
+                print("Budget finito!")
+                break
+    
+    def aggiungi_soldato_giocatore2(self):
+        #print("Giocatore 2 hai un budget di 1000 monete, i soldati e i maghi valgono 500 monete, gli arcieri e i guaritori valgono 250 monete. \n Scegli bene...")
+        while True:
+            if self.budget2>0:
+                scelta=random.randint(0,3)
+                if scelta==0:
+                    if Cavaliere(0,500,20,20,50).get_costo()>self.budget2:
+                        print("Monete non disponibili")
+                        continue
+                    else:
+                        nome="Cavaliere "
+                        cavaliere=Cavaliere(nome,500,20,20,50)
+                        self.esercito_giocatore2.append(cavaliere)
+                        self.budget2-=cavaliere.get_costo()
+                elif scelta==1:
+                    if Arciere(0,250,30,15,50).get_costo()>self.budget2:
+                        print("Non hai abbastanza monete")
+                    else:
+                        nome="Arciere"
+                        arciere=Arciere(nome,250,30,15,50)
+                        self.esercito_giocatore2.append(arciere)
+                        self.budget2-=arciere.get_costo()
+                elif scelta==2:
+                    if Mago(0,500,0,15,50).get_costo()>self.budget2:
+                        print("Monete insufficienti")
+                    else:
+                        nome="Mago"
+                        mago=Mago(nome,500, 0, 15, 50)
+                        self.esercito_giocatore2.append(mago)
+                        self.budget2-=mago.get_costo()
+                elif scelta==3:
+                    if Guaritore(0,250,10,15,50).get_costo()>self.budget2:
+                        print("Non hai soldi")
+                    else:
+                        nome="Guaritore"
+                        guaritore=Guaritore(nome,250, 10, 15, 50)
+                        self.esercito_giocatore2.append(guaritore)
+                        self.budget2-=guaritore.get_costo()
+            else:
+                for i in self.esercito_giocatore2:
+                    print(f"Scelta IA: {i.get_nome()}")
+                break
+    
+    def vittoria(self, soldi, round):
+        if self.esercito_giocatore1==[]:
+            print(f"Ha vinto il computer con {soldi} in {round} round")
+        elif self.esercito_giocatore2==[]:
+            print(f"Il giocatore ha vinto con {soldi}in {round} round")
+    
+    def visualizza(self, esercito):
+        for i in esercito:
+          return  i.get_nome()
+    
+    def round(self):
+        random.shuffle(self.esercito_giocatore1)
+        random.shuffle(self.esercito_giocatore2)
+        count=1
+        if len(self.esercito_giocatore1)==len(self.esercito_giocatore2) or len(self.esercito_giocatore1)>len(self.esercito_giocatore2):
+            while count<=len(self.esercito_giocatore1):
+                print(f"Round numero: {count}")
+                for i in range(len(self.esercito_giocatore1)):
+                    c1=self.esercito_giocatore1[i]
+                    c2=self.esercito_giocatore2[i]
+                    if c1[i]!=Guaritore:
+                        c1.attacca(c2)
+                    else:
+                        c1.heal(self.esercito_giocatore1)
+                    c2.difenditi(c1.get_attacco())
+                    if c1[i]!=Guaritore:
+                        c2.attacca(c1)
+                    else:
+                        c2.heal(self.esercito_giocatore2)
+                    c1.difenditi(c2.get_attacco())
+                    print(c1.get_nome(),"salute:",c1.get_salute(),c2.get_nome(),"salute:",c2.get_salute(),"\n")
+                    if c1.get_salute()<=0:
+                        self.esercito_giocatore1.remove(c1)
+                        self.vittoria(self.budget2, count)
+                        #print(F"COMBATTIMENTO CONCLUSO, IL VINCITORE E' {c2.get_nome()}")
+                        break
+                    elif c2.get_salute()<=0:
+                        self.esercito_giocatore2.remove(c2)
+                        self.vittoria(self.budget1, count)
+                        #print(F"COMBATTIMENTO CONCLUSO, IL VINCITORE E' {c1.get_nome()}")
+                        break
+                    elif c1.get_salute()<=0 and c2.get_salute()<=0:
+                        self.esercito_giocatore1.remove(c1)
+                        self.esercito_giocatore2.remove(c2)
+                        #print(F"COMBATTIMENTO CONCLUSO, PAREGGIO")
+                        break
+                    print(f"Giocatore: {self.visualizza(self.esercito_giocatore1)}")
+                    print(f"CPU: {self.visualizza(self.esercito_giocatore2)}")
+                self.budget1+=500
+                self.aggiungi_soldato_giocatore1()
+                self.budget2+=500
+                self.aggiungi_soldato_giocatore2()
+                    
+                count+=1
+        elif len(self.esercito_giocatore1)<len(self.esercito_giocatore2):
+            while count<=len(self.esercito_giocatore2):
+                print(f"Round numero: {count}")
+                for i in range(len(self.esercito_giocatore2)):
+                    c1=self.esercito_giocatore1[i]
+                    c2=self.esercito_giocatore2[i]
+                    if c1[i]!=Guaritore:
+                        c1.attacca(c2)
+                    else:
+                        c1.heal(self.esercito_giocatore1)
+                    c2.difenditi(c1.get_attacco())
+                    if c1[i]!=Guaritore:
+                        c2.attacca(c1)
+                    else:
+                        c2.heal(self.esercito_giocatore2)
+                    c1.difenditi(c2.get_attacco())
+                    print(c1.get_nome(),"salute:",c1.get_salute(),c2.get_nome(),"salute:",c2.get_salute(),"\n")
+                    if c1.get_salute()<=0:
+                        self.esercito_giocatore1.remove(c1)
+                        self.vittoria(self.budget2, count)
+                        #print(F"COMBATTIMENTO CONCLUSO, IL VINCITORE E' {c2.get_nome()}")
+                        break
+                    elif c2.get_salute()<=0:
+                        self.esercito_giocatore2.remove(c2)
+                        self.vittoria(self.budget1, count)
+                        #print(F"COMBATTIMENTO CONCLUSO, IL VINCITORE E' {c1.get_nome()}")
+                        break
+                    elif c1.get_salute()<=0 and c2.get_salute()<=0:
+                        self.esercito_giocatore1.remove(c1)
+                        self.esercito_giocatore2.remove(c2)
+                        #print(F"COMBATTIMENTO CONCLUSO, PAREGGIO")
+                        break
+                    print(f"Giocatore: {self.visualizza(self.esercito_giocatore1)}")
+                    print(f"CPU: {self.visualizza(self.esercito_giocatore2)}")
+            self.budget1+=500
+            self.aggiungi_soldato_giocatore1()
+            self.budget2+=500
+            self.aggiungi_soldato_giocatore2()
+            count=count+1     
+    
+        
+                
+
+giocatori=Esercito()
+giocatori.aggiungi_soldato_giocatore1()
+giocatori.aggiungi_soldato_giocatore2()
+giocatori.round()
