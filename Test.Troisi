@@ -3,6 +3,7 @@ import random
 
 class Soldato(ABC):
     def __init__(self, nome, costo, attacco, difesa, salute):
+        
         self.__nome=nome
         self.__costo=costo
         self.__attacco=attacco
@@ -106,9 +107,9 @@ class Guaritore(Soldato):
     
     def heal(self, alleati):
         r=random.randrange(0,len(alleati))
-        if self.alleati[r].e_vivo:
+        if alleati[r].e_vivo:
             cura=alleati[r].get_salute() +50
-            self.alleati[r].set_salute(cura)
+            alleati[r].set_salute(cura)
        
 class Esercito:
     def __init__(self):
@@ -226,12 +227,22 @@ class Esercito:
                 for i in range(len(self.esercito_giocatore1)):
                     c1=self.esercito_giocatore1[i]
                     c2=self.esercito_giocatore2[i]
-                    if c1[i]!=Guaritore:
+                    if not isinstance(c1, Guaritore):
                         c1.attacca(c2)
                     else:
                         c1.heal(self.esercito_giocatore1)
+
+                    if not isinstance(c2, Guaritore):
+                        c2.attacca(c1)
+                    else:
+                        c2.heal(self.esercito_giocatore2)
                     c2.difenditi(c1.get_attacco())
-                    if c1[i]!=Guaritore:
+                    if not isinstance(c1, Guaritore):
+                        c1.attacca(c2)
+                    else:
+                        c1.heal(self.esercito_giocatore1)
+
+                    if not isinstance(c2, Guaritore):
                         c2.attacca(c1)
                     else:
                         c2.heal(self.esercito_giocatore2)
@@ -263,15 +274,25 @@ class Esercito:
         elif len(self.esercito_giocatore1)<len(self.esercito_giocatore2):
             while count<=len(self.esercito_giocatore2):
                 print(f"Round numero: {count}")
-                for i in range(len(self.esercito_giocatore2)):
+                for i in range(len(self.esercito_giocatore2)+1):
                     c1=self.esercito_giocatore1[i]
                     c2=self.esercito_giocatore2[i]
-                    if c1[i]!=Guaritore:
+                    if not isinstance(c1, Guaritore):
                         c1.attacca(c2)
                     else:
                         c1.heal(self.esercito_giocatore1)
+
+                    if not isinstance(c2, Guaritore):
+                        c2.attacca(c1)
+                    else:
+                        c2.heal(self.esercito_giocatore2)
                     c2.difenditi(c1.get_attacco())
-                    if c1[i]!=Guaritore:
+                    if not isinstance(c1, Guaritore):
+                        c1.attacca(c2)
+                    else:
+                        c1.heal(self.esercito_giocatore1)
+
+                    if not isinstance(c2, Guaritore):
                         c2.attacca(c1)
                     else:
                         c2.heal(self.esercito_giocatore2)
@@ -301,6 +322,14 @@ class Esercito:
             count=count+1     
     
         
+                
+
+giocatori=Esercito()
+giocatori.aggiungi_soldato_giocatore1()
+giocatori.aggiungi_soldato_giocatore2()
+giocatori.round()
+# giocatori.aggiungi_soldato_giocatore1()
+# giocatori.aggiungi_soldato_giocatore2()
                 
 
 giocatori=Esercito()
